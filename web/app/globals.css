@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  @apply bg-canvas text-ink antialiased;
+}
+
+/* --- aurora / mesh backdrop -------------------------------------------------
+   Decorative only, fixed, behind every reading surface, and deliberately low
+   intensity so it never competes with card content. Static: nothing animates,
+   so prefers-reduced-motion needs no special case. */
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.aurora-blob {
+  position: absolute;
+  display: block;
+  border-radius: 9999px;
+  filter: blur(96px);
+  opacity: 0.24;
+}
+
+.aurora-coral {
+  top: -16rem;
+  right: -12rem;
+  width: 40rem;
+  height: 32rem;
+  background: radial-gradient(closest-side, #ff5c8a, transparent 72%);
+}
+
+.aurora-violet {
+  top: 22%;
+  left: -18rem;
+  width: 38rem;
+  height: 38rem;
+  background: radial-gradient(closest-side, #5b3df5, transparent 72%);
+}
+
+.aurora-blue {
+  bottom: -18rem;
+  left: 30%;
+  width: 44rem;
+  height: 32rem;
+  background: radial-gradient(closest-side, #178bff, transparent 72%);
+}
+
+@media (max-width: 767px) {
+  .aurora-blob {
+    filter: blur(72px);
+    opacity: 0.16;
+  }
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+:where(a, button, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid #4324d4;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

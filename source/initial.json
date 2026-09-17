@@ -1,0 +1,58 @@
+{
+  "case_id": "C04",
+  "data_status": "SYNTHETIC EXERCISE DATA; not real client, country, programme or participant data",
+  "clock": "Exercise-local time only; no real event date implied",
+  "orders": [
+    {
+      "id": "PO-1",
+      "part": "FILTER-X",
+      "quantity": 10
+    }
+  ],
+  "delivery_notes": [
+    {
+      "id": "DN-1",
+      "order_id": "PO-1",
+      "part": "FILTER-X",
+      "listed_quantity": 8
+    },
+    {
+      "id": "DN-2",
+      "order_id": "PO-1",
+      "part": "FILTER-X",
+      "listed_quantity": 2
+    }
+  ],
+  "receipts": [
+    {
+      "id": "RC-1",
+      "delivery_note": "DN-1",
+      "received": 8,
+      "damaged": 1,
+      "accepted": 7
+    },
+    {
+      "id": "RC-2",
+      "delivery_note": "DN-2",
+      "received": 2,
+      "damaged": 0,
+      "accepted": 2
+    }
+  ],
+  "invoices": [
+    {
+      "id": "INV-1",
+      "delivery_notes": [
+        "DN-1",
+        "DN-2"
+      ],
+      "part": "FILTER-X",
+      "quantity": 10
+    }
+  ],
+  "rules": [
+    "Keep received, damaged and accepted quantities separate.",
+    "One scan is not necessarily one new delivery.",
+    "No stock or accounting write without review."
+  ]
+}
