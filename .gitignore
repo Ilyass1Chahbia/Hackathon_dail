@@ -2,6 +2,7 @@ node_modules/
 .next/
 .next-dev/
 out/
+.vercel/
 .venv/
 __pycache__/
 *.pyc
@@ -13,3 +14,7 @@ __pycache__/
 next-env.d.ts
 tsconfig.tsbuildinfo
 .hermes-tmp.*
+.claude-flow/
+.remember/
+.vercel
+.env*

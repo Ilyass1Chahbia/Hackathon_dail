@@ -1,7 +1,7 @@
 # Prototype handoff
 
 Case: **C04 — The delivery arrived. The invoice tells a different story.** Candidate/team: _solo candidate, Octopus day 1_.
-Prototype location: repository root (`web/` Next.js, `api/` FastAPI + LangGraph, `source/` supplied records).
+Prototype location: repository root (Next.js at root, `backend/` FastAPI + LangGraph exposed via `api/index.py`, `source/` supplied records).
 
 ## The problem we validated
 
@@ -42,7 +42,7 @@ workflow returns insufficient evidence and blocks the quantity change until a re
 | Component | Implemented or simulated | Evidence and limitation |
 | --- | --- | --- |
 | Input and event trigger | Simulated | RC-1/RC-2 are supplied synthetic records replayed through labelled buttons; no scanner or supplier feed. Verified by `scripts/smoke.py` and the "Simulation" chips in the UI. |
-| Retrieval / reasoning | Implemented, deterministic | `api/app/engine.py` + `api/app/graph.py` (LangGraph `StateGraph`, conditional edge). `/health` returns `runtime_llm_calls: 0`; 15 pytest cases pin the outputs. |
+| Retrieval / reasoning | Implemented, deterministic | `backend/app/engine.py` + `backend/app/graph.py` (LangGraph `StateGraph`, conditional edge). `/health` returns `runtime_llm_calls: 0`; 15 pytest cases pin the outputs. |
 | Human review | Implemented | `POST /api/decisions` stores approved / corrected / unresolved against the explanation, engine version and quantity snapshot reviewed. |
 | External action | Not implemented (by design) | No supplier message, inventory movement or accounting entry exists in the codebase; the UI states it and the API returns `executed_by_prototype: "no"`. |
 | Persistence and history | Implemented with fallback | `supabase/schema.sql` (`c04_events`, `c04_decisions`) for a hosted Supabase Free project; without credentials the app runs in memory and displays "Persistence unavailable — local demo mode". |

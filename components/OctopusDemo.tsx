@@ -224,7 +224,7 @@ export default function OctopusDemo({ records }: { records: SuppliedRecords }) {
     setBusy("Running deterministic reconciliation…");
     (async () => {
       try {
-        const response = await fetch("/api/reconcile", {
+        const response = await fetch("/api/py/reconcile", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: linkKey,
@@ -232,7 +232,7 @@ export default function OctopusDemo({ records }: { records: SuppliedRecords }) {
         const payload = await response.json();
         if (cancelled) return;
         if (!response.ok) {
-          setWorkflowError(`${payload.error} — ${payload.detail ?? ""}`);
+          setWorkflowError(`Deterministic workflow error — ${payload.detail ?? payload.error ?? response.status}`);
           setResult(null);
         } else {
           setWorkflowError(null);
@@ -286,14 +286,14 @@ export default function OctopusDemo({ records }: { records: SuppliedRecords }) {
     setBusy("Revealing supplied RC-2…");
     try {
       const [receiptRes, noteRes] = await Promise.all([
-        fetch("/api/records/receipt/RC-2", { cache: "no-store" }),
-        fetch("/api/records/delivery_note/DN-2", { cache: "no-store" }),
+        fetch("/api/py/records/receipt/RC-2", { cache: "no-store" }),
+        fetch("/api/py/records/delivery_note/DN-2", { cache: "no-store" }),
       ]);
       const receiptPayload = await receiptRes.json();
       const notePayload = await noteRes.json();
       if (!receiptRes.ok || !noteRes.ok) {
         setWorkflowError(
-          `${receiptPayload.error ?? notePayload.error} — ${receiptPayload.detail ?? notePayload.detail ?? ""}`,
+          `Supplied record lookup failed — ${receiptPayload.detail ?? notePayload.detail ?? receiptPayload.error ?? notePayload.error ?? ""}`,
         );
         return;
       }

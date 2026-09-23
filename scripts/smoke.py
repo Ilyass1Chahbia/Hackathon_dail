@@ -1,19 +1,20 @@
 #!/usr/bin/env python
-"""End-to-end smoke test of the running demo (web proxy -> FastAPI/LangGraph).
+"""End-to-end smoke test of the running demo (Next.js rewrite -> FastAPI/LangGraph).
 
 Run with both services up:
     ./scripts/dev.sh            # terminal 1
-    uv run --project api python scripts/smoke.py   # terminal 2
+    uv run --project backend python scripts/smoke.py   # terminal 2
 """
 
 from __future__ import annotations
 
 import json
+import os
 import sys
 import urllib.request
 
-WEB = "http://127.0.0.1:3000"
-API = "http://127.0.0.1:8000"
+WEB = os.environ.get("SMOKE_WEB", "http://127.0.0.1:3000")
+API = f"{WEB}/api/py"  # same path the browser uses; on Vercel it is api/index.py
 
 failures: list[str] = []
 
@@ -66,7 +67,7 @@ def main() -> int:
 
     # 1 — fast receipt capture
     status, capture = call(
-        f"{WEB}/api/reconcile",
+        f"{API}/reconcile",
         {"delivery_note_ids": ["DN-1"], "receipt_ids": ["RC-1"], "observations": [obs1]},
         "POST",
     )
@@ -75,7 +76,7 @@ def main() -> int:
 
     # 2 — evidence review
     status, review = call(
-        f"{WEB}/api/reconcile",
+        f"{API}/reconcile",
         {
             "order_ids": ["PO-1"],
             "delivery_note_ids": ["DN-1"],
@@ -96,7 +97,7 @@ def main() -> int:
     check("step 2 sources present", all(c["source"] for c in review["conclusions"]), True)
 
     # 3 — changed information
-    status, rc2 = call(f"{WEB}/api/records/receipt/RC-2")
+    status, rc2 = call(f"{API}/records/receipt/RC-2")
     check("step 3 RC-2 revealed", (status, rc2.get("received"), rc2.get("accepted")), (200, 2, 2))
     obs2 = {
         "id": "OBS-2",
@@ -107,7 +108,7 @@ def main() -> int:
         "delivery_note": "DN-2",
     }
     status, changed = call(
-        f"{WEB}/api/reconcile",
+        f"{API}/reconcile",
         {
             "order_ids": ["PO-1"],
             "delivery_note_ids": ["DN-1", "DN-2"],
@@ -135,7 +136,7 @@ def main() -> int:
         "package_identity": None,
     }
     status, uncertain = call(
-        f"{WEB}/api/reconcile",
+        f"{API}/reconcile",
         {
             "order_ids": ["PO-1"],
             "delivery_note_ids": ["DN-1"],

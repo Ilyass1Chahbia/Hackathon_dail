@@ -1,0 +1,5 @@
+# Runtime dependencies for the Vercel Python function (api/index.py).
+# Mirrors [project].dependencies in backend/pyproject.toml; keep the two in step.
+fastapi>=0.115
+langgraph>=0.2.60
+pydantic>=2.9

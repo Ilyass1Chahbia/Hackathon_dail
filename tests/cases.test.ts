@@ -1,7 +1,7 @@
 /**
  * Focused tests for the identifier lookup and OCR candidate extraction.
  *
- * Run with:  cd web && npm run test:cases
+ * Run with:  npm run test:cases
  * Node 24 strips the TypeScript types directly, so this needs no test framework.
  */
 import assert from "node:assert/strict";

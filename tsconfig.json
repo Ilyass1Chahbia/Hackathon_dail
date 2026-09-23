@@ -32,20 +32,12 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    ".next-dev/types/**/*.ts",
-    ".next-verify-3101/types/**/*.ts",
-    ".next-verify-3102/types/**/*.ts",
-    ".next-verify-3113/types/**/*.ts",
-    ".next-verify-3131/types/**/*.ts",
-    ".next-verify-3132/types/**/*.ts",
-    ".next-verify-3133/types/**/*.ts",
-    ".next-verify-3141/types/**/*.ts",
-    ".next-verify-3142/types/**/*.ts",
     ".next/types/**/*.ts",
-    "next-env.d.ts",
-    ".next-verify-3143/types/**/*.ts"
+    ".next-dev/types/**/*.ts",
+    "next-env.d.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "backend"
   ]
 }

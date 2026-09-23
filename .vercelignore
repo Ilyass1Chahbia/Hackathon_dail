@@ -1,0 +1,12 @@
+node_modules
+.next
+.next-dev
+.venv
+**/.venv
+__pycache__
+.pytest_cache
+.git
+.remember
+.claude-flow
+.claude
+.env.local

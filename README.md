@@ -23,16 +23,32 @@ this is not an official client service.
 
 ## Layout
 
+One Vercel project: Next.js at the repository root, the Python workflow as a single serverless function.
+
 ```
 source/brief.md, source/initial.json   supplied records (unchanged)
 docs/scorecard.md, wolf-handoff-template.md  supplied documents (unchanged)
 docs/wolf-handoff.md                   completed handoff
 docs/client-correction.md              the client correction and what changed
-api/                                   FastAPI + LangGraph, deterministic engine, tests
-web/                                   Next.js App Router UI
+app/, components/, lib/, tests/        Next.js App Router UI and its route handlers (Supabase persistence)
+backend/app/                           FastAPI + LangGraph, deterministic engine; backend/tests/ pytest suite
+api/index.py                           Vercel Python function: mounts backend/app at /api/py
+requirements.txt                       runtime deps for that function (mirror of backend/pyproject.toml)
+vercel.json                            trims tests/docs out of the Python bundle
 supabase/schema.sql                    tables for simulated events and human decisions
 scripts/                               dev, test, smoke, reset
 ```
+
+The browser calls `/api/py/reconcile` and `/api/py/records/...` directly. On Vercel that path is the Python
+function; locally `next.config.mjs` rewrites it to uvicorn on :8000.
+
+## Deploy on Vercel
+
+1. Push the repository to GitHub and import it on Vercel. No root directory, build command or framework override is
+   needed: Next.js is detected at the root and `api/index.py` becomes a Python function.
+2. Optional environment variables: `SUPABASE_URL` and `SUPABASE_SECRET_KEY`. Without them the app runs in the
+   labelled in-memory mode.
+3. Deploy. `/api/py/health` should answer `{"status":"ok","runtime_llm_calls":0,...}`.
 
 ## Run it
 
@@ -46,16 +62,17 @@ Requires Node 20+ and Python 3.11+ with [`uv`](https://docs.astral.sh/uv/).
 Run the pieces separately if you prefer:
 
 ```bash
-cd api && uv sync && uv run uvicorn app.main:app --port 8000
-cd web && npm install && npm run dev
+uv sync --project backend && uv run --project backend uvicorn api.index:app --port 8000
+npm install && npm run dev
 ```
 
 Tests and end-to-end verification:
 
 ```bash
 ./scripts/test-api.sh                                  # uv sync + pytest (15 tests)
-python scripts/smoke.py                                # against both running services
-cd web && npm run build                                # type-check + production build
+npm run test:cases                                     # identifier lookup / OCR candidate tests
+uv run --project backend python scripts/smoke.py       # against both running services
+npm run build                                          # type-check + production build
 ```
 
 `./scripts/dev.sh` runs the dev server with `NEXT_DIST_DIR=.next-dev`, so running `npm run build` while the demo is
@@ -80,7 +97,7 @@ distribution — Node and `uv` are installed there.
 | Component | Implemented or simulated | Evidence and limitation |
 | --- | --- | --- |
 | Input / event trigger | Partly implemented | The barcode camera scan is **real** (`@zxing/browser`, 1D + 2D, rear camera where available) but the code-to-delivery lookup behind it is **mocked** against the supplied synthetic records. RC-1 and RC-2 are supplied synthetic records revealed from `source/initial.json`. No EDI or supplier feed is connected. |
-| Retrieval / reasoning | Implemented, deterministic | `api/app/engine.py` computes every quantity and sentence from the linked evidence. `api/app/graph.py` runs it in a LangGraph `StateGraph`. Zero LLM calls. |
+| Retrieval / reasoning | Implemented, deterministic | `backend/app/engine.py` computes every quantity and sentence from the linked evidence. `backend/app/graph.py` runs it in a LangGraph `StateGraph`. Zero LLM calls. |
 | Human review | Implemented | Approve / correct / unresolved decisions are recorded against the exact explanation and engine version they reviewed. |
 | External action | Not implemented | The prototype executes no supplier message, inventory movement or accounting entry. It says so on screen and returns `executed_by_prototype: no`. |
 | Persistence | Supabase with labelled local fallback | Only simulated events and reviewer decisions are stored. If Supabase is unreachable the UI shows **"Persistence unavailable — local demo mode"** and never claims remote persistence. |
@@ -133,8 +150,8 @@ RLS is enabled with no policies; the app reads this table from server routes wit
 
 1. Create a Free project, then apply `supabase/schema.sql`. It enables RLS on both tables and deliberately adds no
    policies, so nothing is reachable with a browser key.
-2. Copy `.env.example` to `web/.env.local` and set `SUPABASE_URL` and the **secret key** as `SUPABASE_SECRET_KEY`.
-3. Restart the web app. The header banner switches to "Hosted Supabase connected".
+2. Copy `.env.example` to `.env.local` (locally) or set the same variables in the Vercel project and set `SUPABASE_URL` and the **secret key** as `SUPABASE_SECRET_KEY`.
+3. Restart the web app (or redeploy). The header banner switches to "Hosted Supabase connected".
 
 The persistence client is **server-only** — it is imported exclusively by route handlers and reads the secret key. Anon,
 publishable and `NEXT_PUBLIC_*` keys are not accepted, so no Supabase client can leak into a browser bundle. The older
